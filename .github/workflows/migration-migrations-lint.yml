@@ -1,0 +1,24 @@
+name: Migration PHP syntax
+on:
+  pull_request:
+    branches: [dev]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  migration-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+      - name: Check syntax of all 72 migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          count="$(find services -type f -path '*/database/migrations/*.php' | wc -l)"
+          echo "Found $count migration files"
+          test "$count" -eq 72
+          find services -type f -path '*/database/migrations/*.php' -print0 | xargs -0 -n1 php -l
